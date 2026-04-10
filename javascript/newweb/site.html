@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Do Not Click</title>
+		<style>
+			* {
+				box-sizing: border-box;
+			}
+
+			body {
+				margin: 0;
+				font-family: Arial, sans-serif;
+				color: #222;
+				background: #fff;
+				padding: 24px;
+			}
+
+			.stage {
+				max-width: 900px;
+				margin: 0 auto;
+				position: relative;
+				min-height: 380px;
+			}
+
+			header {
+				margin-bottom: 16px;
+			}
+
+			h1 {
+				margin: 0 0 6px;
+				font-size: 28px;
+			}
+
+			.subtitle {
+				margin: 0;
+				font-size: 16px;
+				color: #555;
+			}
+
+			.button-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+				gap: 10px;
+				margin: 16px 0;
+			}
+
+			.danger-btn {
+				padding: 10px 12px;
+				font-size: 14px;
+				border: 1px solid #999;
+				background: #eee;
+				cursor: pointer;
+				position: absolute;
+			}
+
+			.reminder {
+				border: 1px solid #ccc;
+				padding: 12px;
+				margin-top: 10px;
+			}
+
+			.reminder h2 {
+				margin: 0 0 8px;
+				font-size: 18px;
+			}
+
+			.reminder-list {
+				margin: 0;
+				padding-left: 18px;
+				font-size: 14px;
+			}
+
+			.video-panel {
+				margin-top: 16px;
+				padding: 12px;
+				border: 1px solid #333;
+				display: none;
+			}
+
+			.video-panel.visible {
+				display: block;
+			}
+
+			.video-panel h3 {
+				margin: 0 0 8px;
+				font-size: 18px;
+			}
+
+			.video-hint {
+				margin: 6px 0 0;
+				font-size: 12px;
+				color: #555;
+			}
+
+			video {
+				width: 100%;
+				background: #000;
+			}
+		</style>
+	</head>
+	<body>
+		<main class="stage">
+			<header>
+				<h1>Absolutely Do Not Click</h1>
+				<p class="subtitle">Seriously. It keeps asking you to stop. It does not stop.</p>
+			</header>
+
+			<section class="button-grid">
+				<button class="danger-btn" id="dangerButton">Don't Click</button>
+			</section>
+
+			<section class="reminder" aria-live="polite">
+				<h2>Reminder Console</h2>
+				<ul class="reminder-list" id="reminderList">
+					<li>Start by not clicking. Great job already.</li>
+				</ul>
+			</section>
+
+			<section class="video-panel" id="videoPanel">
+				<h3>Rage Bait Protocol Activated</h3>
+				<video id="rageVideo" controls preload="auto" autoplay muted playsinline src="./video.mp4"></video>
+			</section>
+		</main>
+
+		<script>
+			const reminders = [
+				"Please stop.",
+				"We asked nicely. That was the last time.",
+				"You're really committed to this, huh?",
+				"Big red button energy detected.",
+				"Ok. That is enough. Seriously.",
+				"The buttons are winning. You are not.",
+				"Final warning.",
+			];
+
+			const reminderList = document.getElementById("reminderList");
+			const videoPanel = document.getElementById("videoPanel");
+			const rageVideo = document.getElementById("rageVideo");
+			const videoStatus = document.getElementById("videoStatus");
+			const dangerButton = document.getElementById("dangerButton");
+			const stage = document.querySelector(".stage");
+
+			let clickCount = 0;
+			const revealAt = 7;
+
+			function addReminder(text) {
+				const item = document.createElement("li");
+				item.textContent = text;
+				reminderList.prepend(item);
+			}
+
+			function handleClick() {
+				clickCount += 1;
+				const reminderText = reminders[Math.min(clickCount - 1, reminders.length - 1)];
+				addReminder(reminderText);
+				moveButton();
+
+				if (clickCount >= revealAt) {
+					videoPanel.classList.add("visible");
+					rageVideo.load();
+					rageVideo.play().catch(() => {
+						videoStatus.textContent = "Autoplay blocked. Click play.";
+					});
+				}
+			}
+
+			rageVideo.addEventListener("error", () => {
+				const err = rageVideo.error;
+				const code = err ? err.code : "unknown";
+				videoStatus.textContent = `Video error (code ${code}). Check file name and format.`;
+			});
+
+			rageVideo.addEventListener("loadeddata", () => {
+				videoStatus.textContent = "Video loaded.";
+			});
+
+			function moveButton() {
+				const stageRect = stage.getBoundingClientRect();
+				const buttonRect = dangerButton.getBoundingClientRect();
+				const maxLeft = stageRect.width - buttonRect.width - 10;
+				const maxTop = stageRect.height - buttonRect.height - 10;
+				const left = Math.max(0, Math.floor(Math.random() * maxLeft));
+				const top = Math.max(0, Math.floor(Math.random() * maxTop));
+				dangerButton.style.left = `${left}px`;
+				dangerButton.style.top = `${top}px`;
+			}
+
+			dangerButton.addEventListener("click", handleClick);
+			window.addEventListener("load", moveButton);
+		</script>
+	</body>
+</html>
